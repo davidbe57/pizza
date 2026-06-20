@@ -1,0 +1,37 @@
+{
+  "lundi": {
+    "midi": "11:30 – 14:00",
+    "soir": "18:00 – 21:30",
+    "ferme": false
+  },
+  "mardi": {
+    "midi": "",
+    "soir": "",
+    "ferme": true
+  },
+  "mercredi": {
+    "midi": "11:30 – 14:00",
+    "soir": "18:30 – 22:00",
+    "ferme": false
+  },
+  "jeudi": {
+    "midi": "",
+    "soir": "",
+    "ferme": true
+  },
+  "vendredi": {
+    "midi": "11:30 – 14:00",
+    "soir": "18:30 – 23:30",
+    "ferme": false
+  },
+  "samedi": {
+    "midi": "Fermé midi",
+    "soir": "18:30 – 22:00",
+    "ferme": false
+  },
+  "dimanche": {
+    "midi": "11:30 – 14:00",
+    "soir": "18:00 – 21:30",
+    "ferme": false
+  }
+}

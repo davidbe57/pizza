@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "author": "Sophie M.",
+    "source": "Google Maps",
+    "date": "2025-12-15",
+    "text": "Une vraie pizzeria à l'italienne ! Les produits sont frais et la pâte est excellente. On se croirait en Italie.",
+    "stars": 5
+  },
+  {
+    "id": 2,
+    "author": "Thomas L.",
+    "source": "Facebook",
+    "date": "2026-01-20",
+    "text": "Meilleures pizzas du secteur ! Le rapport qualité-prix est imbattable et l'accueil est très chaleureux. Je recommande vivement.",
+    "stars": 5
+  },
+  {
+    "id": 3,
+    "author": "Marie D.",
+    "source": "Google Maps",
+    "date": "2026-03-08",
+    "text": "Ravis de ce petit restaurant de village. Les ingrédients locaux font toute la différence. La pizza du mois est toujours une belle surprise.",
+    "stars": 5
+  },
+  {
+    "id": 4,
+    "author": "David B.",
+    "source": "Facebook",
+    "date": "2026-05-02",
+    "text": "Excellentes pizzas et accueil chaleureux",
+    "stars": 5
+  }
+]

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Casa Tonio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --red: #C62828; --dark: #1a1a1a; --gray: #666; --gray-light: #e0e0e0; }
+body {
+  font-family: 'Inter', sans-serif; background: #f5f5f5; color: var(--dark);
+  padding: 24px; min-height: 100vh;
+}
+.hidden { display: none !important; }
+.container { max-width: 1200px; margin: 0 auto; }
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid var(--red);
+}
+header h1 { font-size: 1.4rem; font-weight: 700; }
+header h1 span { color: var(--red); }
+.btn {
+  padding: 10px 20px; border-radius: 8px; border: none; font-family: inherit;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.btn-primary { background: var(--red); color: #fff; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary { background: var(--gray-light); color: var(--dark); }
+.btn-secondary:hover { background: #ccc; }
+.btn-danger { background: #d32f2f; color: #fff; }
+.btn-danger:hover { opacity: 0.9; }
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+.btn-outline { background: transparent; border: 2px solid var(--red); color: var(--red); }
+.btn-outline:hover { background: var(--red); color: #fff; }
+
+.alert-banner {
+  display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+  background: #d32f2f; color: #fff; border-radius: 8px; margin-bottom: 16px;
+  font-weight: 600; animation: alertPulse 1s ease-in-out 3;
+  box-shadow: 0 4px 12px rgba(211,47,47,0.3);
+}
+@keyframes alertPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+
+.login-box {
+  max-width: 400px; margin: 80px auto; text-align: center;
+}
+.login-box h2 { margin-bottom: 24px; font-size: 1.5rem; }
+.login-box input {
+  width: 100%; padding: 14px 16px; border: 2px solid var(--gray-light);
+  border-radius: 8px; font-size: 1rem; margin-bottom: 16px; font-family: inherit;
+}
+.login-box input:focus { outline: none; border-color: var(--red); }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+.tab {
+  padding: 12px 24px; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600;
+  font-size: 0.9rem; background: #e0e0e0; color: var(--gray); border: none; font-family: inherit;
+}
+.tab.active { background: #fff; color: var(--red); box-shadow: 0 -2px 8px rgba(0,0,0,0.06); }
+
+.panel { background: #fff; border-radius: 0 8px 8px 8px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+.pizza-grid { display: grid; gap: 16px; }
+.pizza-card {
+  display: grid; grid-template-columns: 80px 1fr auto auto; gap: 16px;
+  align-items: center; padding: 16px; border: 1px solid var(--gray-light);
+  border-radius: 8px; transition: box-shadow 0.2s;
+}
+.pizza-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.pizza-card img {
+  width: 80px; height: 80px; object-fit: cover; border-radius: 6px;
+}
+.pizza-card .info h3 { font-size: 0.95rem; margin-bottom: 4px; }
+.pizza-card .info h3 .badge {
+  display: inline-block; font-size: 0.65rem; background: #FFD54F; color: #333;
+  padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 600; vertical-align: middle;
+}
+.pizza-card .info p { font-size: 0.8rem; color: var(--gray); }
+.pizza-card .info .price { font-weight: 700; color: var(--red); font-size: 0.9rem; margin-top: 4px; }
+.pizza-card .actions { display: flex; gap: 6px; }
+
+/* Form modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 1000; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 12px; padding: 32px; width: 90%; max-width: 520px;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal h2 { margin-bottom: 20px; font-size: 1.2rem; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--gray); }
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 10px 12px; border: 2px solid var(--gray-light);
+  border-radius: 6px; font-size: 0.9rem; font-family: inherit;
+}
+.form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--red); }
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-group .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.form-group input[type="checkbox"] { width: auto; }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+
+/* Hours editor */
+.hours-table { width: 100%; border-collapse: collapse; }
+.hours-table th, .hours-table td { padding: 12px 8px; text-align: left; border-bottom: 1px solid var(--gray-light); }
+.hours-table th { font-size: 0.8rem; font-weight: 600; color: var(--gray); }
+.hours-table td { font-size: 0.9rem; }
+.hours-table input { width: 100%; padding: 8px 10px; border: 2px solid var(--gray-light); border-radius: 6px; font-family: inherit; font-size: 0.85rem; }
+.hours-table input:focus { outline: none; border-color: var(--red); }
+
+.status-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 600;
+}
+.status-new { background: #FFF3E0; color: #E65100; }
+.status-confirmed { background: #E8F5E9; color: #2E7D32; }
+.status-done { background: #F5F5F5; color: #999; }
+.empty-state { text-align: center; padding: 40px; color: var(--gray); }
+.empty-state p { margin-bottom: 16px; }
+.toast {
+  position: fixed; bottom: 24px; right: 24px; background: #333; color: #fff;
+  padding: 12px 24px; border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+  opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 2000;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+header .user-info { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: var(--gray); }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+
+  <!-- Login -->
+  <div id="loginView" class="login-box">
+    <h2>🔐 Admin <span style="color:var(--red)">Casa Tonio</span></h2>
+    <input type="password" id="loginPassword" placeholder="Mot de passe" value="tonio2024" autofocus>
+    <button class="btn btn-primary" id="loginBtn" style="width:100%">Se connecter</button>
+    <p id="loginError" style="color:#d32f2f;margin-top:12px;font-size:0.85rem;display:none"></p>
+  </div>
+
+  <!-- Admin panel -->
+  <div id="adminView" class="hidden">
+    <header>
+      <h1><span>Casa Tonio</span> — Administration</h1>
+      <div class="user-info">
+        <span id="statusText">Connecté</span>
+        <button class="btn btn-secondary btn-sm" id="logoutBtn">Déconnexion</button>
+        <a href="/" target="_blank" class="btn btn-outline btn-sm">Voir le site</a>
+      </div>
+    </header>
+
+    <div id="newOrderAlert" class="alert-banner hidden">
+      <span id="alertText">🔔 Nouvelles commandes !</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="pizzas">🍕 Pizzas</button>
+      <button class="tab" data-tab="orders">📦 Commandes</button>
+      <button class="tab" data-tab="testimonials">💬 Avis</button>
+      <button class="tab" data-tab="hours">🕐 Horaires</button>
+      <button class="tab" data-tab="settings">⚙️ Réglages</button>
+    </div>
+
+    <!-- Tab: Pizzas -->
+    <div id="tabPizzas" class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <p style="font-size:0.9rem;color:var(--gray)">Gérez votre carte et la pizza du mois</p>
+        <button class="btn btn-primary" id="addPizzaBtn">+ Ajouter une pizza</button>
+      </div>
+      <div id="pizzaList" class="pizza-grid"></div>
+    </div>
+
+    <!-- Tab: Orders -->
+    <div id="tabOrders" class="panel hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <p style="font-size:0.9rem;color:var(--gray)">Commandes reçues via le site</p>
+      </div>
+      <div id="ordersList"></div>
+    </div>
+
+    <!-- Tab: Testimonials -->
+    <div id="tabTestimonials" class="panel hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <p style="font-size:0.9rem;color:var(--gray)">Gérez les avis clients affichés sur le site</p>
+        <button class="btn btn-primary" id="addTestimonialBtn">+ Ajouter un avis</button>
+      </div>
+      <div id="testimonialList"></div>
+    </div>
+
+    <!-- Tab: Settings -->
+    <div id="tabSettings" class="panel hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <p style="font-size:0.9rem;color:var(--gray)">Configuration des commandes à emporter</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" id="resetSlotOverridesBtn">Réinitialiser les créneaux</button>
+          <button class="btn btn-primary" id="saveSettingsBtn">Enregistrer tout</button>
+        </div>
+      </div>
+      <div class="form-group" style="max-width:400px">
+        <label>Nombre max de pizzas par créneau (valeur par défaut)</label>
+        <input type="number" id="maxPizzasPerSlot" min="1" max="50" style="width:100%;padding:12px 14px;border:2px solid var(--gray-light);border-radius:8px;font-family:inherit;font-size:1rem">
+        <p style="font-size:0.8rem;color:#999;margin-top:4px">Utilisé pour les créneaux sans limite personnalisée ci-dessous.</p>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--gray-light);margin:24px 0">
+      <h3 style="margin-bottom:16px;font-size:1rem">Limites par créneau de 15 min</h3>
+      <p style="font-size:0.8rem;color:#999;margin-bottom:16px">Ajustez la capacité max pour chaque créneau horaire. Laissez vide pour utiliser la valeur par défaut.</p>
+      <div id="slotOverridesContainer"></div>
+    </div>
+
+    <!-- Tab: Hours -->
+    <div id="tabHours" class="panel hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <p style="font-size:0.9rem;color:var(--gray)">Modifiez les horaires d'ouverture</p>
+        <button class="btn btn-primary" id="saveHoursBtn">Enregistrer</button>
+      </div>
+      <table class="hours-table">
+        <thead><tr><th>Jour</th><th>Midi</th><th>Soir</th><th>Fermé</th></tr></thead>
+        <tbody id="hoursBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Pizza modal -->
+<div class="modal-overlay" id="pizzaModal">
+  <div class="modal">
+    <h2 id="modalTitle">Ajouter une pizza</h2>
+    <input type="hidden" id="pizzaId">
+    <div class="form-group">
+      <label>Nom de la pizza</label>
+      <input type="text" id="pizzaName" placeholder="Ex: Margherita">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="pizzaDesc" placeholder="Ingrédients..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Prix</label>
+      <input type="text" id="pizzaPrice" placeholder="Ex: 10.00 €">
+    </div>
+    <div class="form-group">
+      <label>URL de la photo</label>
+      <input type="url" id="pizzaImage" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label>Catégorie</label>
+      <select id="pizzaCategory">
+        <option value="Classiques">Classiques</option>
+        <option value="Spéciales">Spéciales</option>
+        <option value="Du Moment">Du Moment</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Allergènes</label>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
+        <label class="checkbox-label" style="font-size:0.85rem"><input type="checkbox" class="allergen-cb" value="gluten"> 🌾 Gluten</label>
+        <label class="checkbox-label" style="font-size:0.85rem"><input type="checkbox" class="allergen-cb" value="lactose"> 🥛 Lactose</label>
+        <label class="checkbox-label" style="font-size:0.85rem"><input type="checkbox" class="allergen-cb" value="oeufs"> 🥚 Œufs</label>
+        <label class="checkbox-label" style="font-size:0.85rem"><input type="checkbox" class="allergen-cb" value="poisson"> 🐟 Poisson</label>
+        <label class="checkbox-label" style="font-size:0.85rem"><input type="checkbox" class="allergen-cb" value="soja"> 🫘 Soja</label>
+        <label class="checkbox-label" style="font-size:0.85rem"><input type="checkbox" class="allergen-cb" value="fruitsCoque"> 🥜 Fruits à coque</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="pizzaOfMonth">
+        🏆 Pizza du mois
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" id="cancelPizzaBtn">Annuler</button>
+      <button class="btn btn-primary" id="savePizzaBtn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Testimonial modal -->
+<div class="modal-overlay" id="testimonialModal">
+  <div class="modal">
+    <h2 id="testimonialModalTitle">Ajouter un avis</h2>
+    <input type="hidden" id="testimonialId">
+    <div class="form-group">
+      <label>Auteur</label>
+      <input type="text" id="testimonialAuthor" placeholder="Ex: Sophie M.">
+    </div>
+    <div class="form-group">
+      <label>Source</label>
+      <input type="text" id="testimonialSource" placeholder="Ex: Google Maps, Facebook">
+    </div>
+    <div class="form-group">
+      <label>Avis</label>
+      <textarea id="testimonialText" placeholder="Texte de l'avis..." rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Date de publication</label>
+      <input type="date" id="testimonialDate">
+    </div>
+    <div class="form-group">
+      <label>Note</label>
+      <select id="testimonialStars">
+        <option value="5">★★★★★</option>
+        <option value="4">★★★★☆</option>
+        <option value="3">★★★☆☆</option>
+        <option value="2">★★☆☆☆</option>
+        <option value="1">★☆☆☆☆</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" id="cancelTestimonialBtn">Annuler</button>
+      <button class="btn btn-primary" id="saveTestimonialBtn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('token') || null;
+let editingPizzaId = null;
+
+// ─── Helpers ───
+async function api(url, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = token;
+  const res = await fetch(API + url, { ...opts, headers });
+  if (!res.ok) {
+    if (res.status === 401) { token = null; localStorage.removeItem('token'); showLogin(); }
+    throw new Error((await res.json()).error || 'Erreur');
+  }
+  return res.json();
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function showLogin() {
+  document.getElementById('loginView').classList.remove('hidden');
+  document.getElementById('adminView').classList.add('hidden');
+}
+
+function showAdmin() {
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('adminView').classList.remove('hidden');
+}
+
+// ─── Auth ───
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  try {
+    const data = await api('/login', { method: 'POST', body: JSON.stringify({ password }) });
+    token = data.token; localStorage.setItem('token', token);
+    errEl.style.display = 'none';
+    init();
+  } catch (e) {
+    errEl.textContent = 'Mot de passe incorrect';
+    errEl.style.display = 'block';
+  }
+});
+
+document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  if (token) await api('/logout', { method: 'POST' }).catch(() => {});
+  token = null; localStorage.removeItem('token'); showLogin();
+});
+
+// ─── Testimonial CRUD ───
+let editingTestimonialId = null;
+
+async function loadTestimonials() {
+  const testimonials = await api('/testimonials');
+  const list = document.getElementById('testimonialList');
+  if (testimonials.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>Aucun avis</p><button class="btn btn-primary" onclick="document.getElementById(\'addTestimonialBtn\').click()">Ajouter le premier avis</button></div>';
+    return;
+  }
+  list.innerHTML = testimonials.map(t => `
+    <div class="pizza-card" style="grid-template-columns:1fr auto">
+      <div class="info">
+        <h3>${t.author} <span style="font-weight:400;font-size:0.8rem;color:#999">— ${t.source || ''}${t.date ? ' · ' + t.date : ''}</span></h3>
+        <p style="color:#FFB800;font-size:0.9rem">${'★'.repeat(t.stars)}${'☆'.repeat(5 - t.stars)}</p>
+        <p style="font-size:0.85rem;color:#666;font-style:italic;margin-top:4px">« ${t.text} »</p>
+      </div>
+      <div class="actions" style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-secondary btn-sm" onclick="editTestimonial(${t.id})">Modifier</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTestimonial(${t.id})">Suppr.</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openTestimonialModal(t = null) {
+  editingTestimonialId = t ? t.id : null;
+  document.getElementById('testimonialModalTitle').textContent = t ? 'Modifier l\'avis' : 'Ajouter un avis';
+  document.getElementById('testimonialId').value = t ? t.id : '';
+  document.getElementById('testimonialAuthor').value = t ? t.author : '';
+  document.getElementById('testimonialSource').value = t ? (t.source || '') : '';
+  document.getElementById('testimonialText').value = t ? t.text : '';
+  document.getElementById('testimonialDate').value = t ? (t.date || '') : '';
+  document.getElementById('testimonialStars').value = t ? t.stars : 5;
+  document.getElementById('testimonialModal').classList.add('open');
+}
+
+function closeTestimonialModal() {
+  document.getElementById('testimonialModal').classList.remove('open');
+  editingTestimonialId = null;
+}
+
+document.getElementById('addTestimonialBtn').addEventListener('click', () => openTestimonialModal());
+document.getElementById('cancelTestimonialBtn').addEventListener('click', closeTestimonialModal);
+document.getElementById('testimonialModal').addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal-overlay')) closeTestimonialModal();
+});
+
+document.getElementById('saveTestimonialBtn').addEventListener('click', async () => {
+  const data = {
+    author: document.getElementById('testimonialAuthor').value.trim(),
+    source: document.getElementById('testimonialSource').value.trim(),
+    text: document.getElementById('testimonialText').value.trim(),
+    date: document.getElementById('testimonialDate').value || new Date().toISOString().slice(0, 10),
+    stars: parseInt(document.getElementById('testimonialStars').value)
+  };
+  if (!data.author || !data.text) { toast('L\'auteur et le texte sont requis'); return; }
+  try {
+    if (editingTestimonialId) {
+      await api(`/testimonials/${editingTestimonialId}`, { method: 'PUT', body: JSON.stringify(data) });
+      toast('Avis modifié');
+    } else {
+      await api('/testimonials', { method: 'POST', body: JSON.stringify(data) });
+      toast('Avis ajouté');
+    }
+    closeTestimonialModal();
+    await loadTestimonials();
+  } catch (e) { toast('Erreur: ' + e.message); }
+});
+
+async function editTestimonial(id) {
+  const list = await api('/testimonials');
+  const t = list.find(x => x.id === id);
+  if (t) openTestimonialModal(t);
+}
+
+async function deleteTestimonial(id) {
+  if (!confirm('Supprimer cet avis ?')) return;
+  try {
+    await api(`/testimonials/${id}`, { method: 'DELETE' });
+    toast('Avis supprimé');
+    await loadTestimonials();
+  } catch (e) { toast('Erreur: ' + e.message); }
+}
+
+// ─── Tab switching ───
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+    tab.classList.add('active');
+    document.getElementById('tab' + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1)).classList.remove('hidden');
+  });
+});
+
+// ─── Pizza CRUD ───
+async function loadPizzas() {
+  const menu = await api('/menu');
+  const list = document.getElementById('pizzaList');
+  if (menu.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>Aucune pizza pour le moment</p><button class="btn btn-primary" onclick="document.getElementById(\'addPizzaBtn\').click()">Ajouter votre première pizza</button></div>';
+    return;
+  }
+  list.innerHTML = menu.map(p => `
+    <div class="pizza-card">
+      <img src="${p.image || 'https://cdn.website.dish.co/media/83/3f/8425421/CASA-TONIO-jpg-20230309-201756-0000-jpg.jpg'}" alt="${p.name}" onerror="this.src='https://cdn.website.dish.co/media/83/3f/8425421/CASA-TONIO-jpg-20230309-201756-0000-jpg.jpg'">
+      <div class="info">
+        <h3>${p.name} ${p.pizzaOfMonth ? '<span class="badge">🏆 Pizza du mois</span>' : ''}</h3>
+        <p>${p.description}</p>
+        <span class="price">${p.price}</span> <span style="font-size:0.75rem;color:#999">— ${p.category}</span>
+        ${p.allergens && p.allergens.length ? `<span style="font-size:0.7rem;color:#999;margin-left:8px">${p.allergens.map(a => a).join(' · ')}</span>` : ''}
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editPizza(${p.id})">Modifier</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePizza(${p.id})">Suppr.</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openModal(pizza = null) {
+  editingPizzaId = pizza ? pizza.id : null;
+  document.getElementById('modalTitle').textContent = pizza ? 'Modifier la pizza' : 'Ajouter une pizza';
+  document.getElementById('pizzaId').value = pizza ? pizza.id : '';
+  document.getElementById('pizzaName').value = pizza ? pizza.name : '';
+  document.getElementById('pizzaDesc').value = pizza ? pizza.description : '';
+  document.getElementById('pizzaPrice').value = pizza ? pizza.price : '';
+  document.getElementById('pizzaImage').value = pizza ? pizza.image : '';
+  document.getElementById('pizzaCategory').value = pizza ? pizza.category : 'Classiques';
+  document.getElementById('pizzaOfMonth').checked = pizza ? pizza.pizzaOfMonth : false;
+  document.querySelectorAll('.allergen-cb').forEach(cb => {
+    cb.checked = pizza ? (pizza.allergens || []).includes(cb.value) : false;
+  });
+  document.getElementById('pizzaModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('pizzaModal').classList.remove('open');
+  editingPizzaId = null;
+}
+
+document.getElementById('addPizzaBtn').addEventListener('click', () => openModal());
+document.getElementById('cancelPizzaBtn').addEventListener('click', closeModal);
+document.getElementById('pizzaModal').addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal-overlay')) closeModal();
+});
+
+document.getElementById('savePizzaBtn').addEventListener('click', async () => {
+  const data = {
+    name: document.getElementById('pizzaName').value.trim(),
+    description: document.getElementById('pizzaDesc').value.trim(),
+    price: document.getElementById('pizzaPrice').value.trim(),
+    image: document.getElementById('pizzaImage').value.trim(),
+    category: document.getElementById('pizzaCategory').value,
+    pizzaOfMonth: document.getElementById('pizzaOfMonth').checked,
+    allergens: Array.from(document.querySelectorAll('.allergen-cb:checked')).map(cb => cb.value)
+  };
+  if (!data.name) { toast('Le nom est requis'); return; }
+  try {
+    if (editingPizzaId) {
+      await api(`/menu/${editingPizzaId}`, { method: 'PUT', body: JSON.stringify(data) });
+      toast('Pizza modifiée');
+    } else {
+      await api('/menu', { method: 'POST', body: JSON.stringify(data) });
+      toast('Pizza ajoutée');
+    }
+    closeModal();
+    await loadPizzas();
+  } catch (e) { toast('Erreur: ' + e.message); }
+});
+
+async function editPizza(id) {
+  const menu = await api('/menu');
+  const pizza = menu.find(p => p.id === id);
+  if (pizza) openModal(pizza);
+}
+
+async function deletePizza(id) {
+  if (!confirm('Supprimer cette pizza ?')) return;
+  try {
+    await api(`/menu/${id}`, { method: 'DELETE' });
+    toast('Pizza supprimée');
+    await loadPizzas();
+  } catch (e) { toast('Erreur: ' + e.message); }
+}
+
+// ─── Orders ───
+let ordersPollTimer = null;
+let lastOrderCount = 0;
+let notifiedIds = new Set();
+
+function showAlert(count) {
+  const alert = document.getElementById('newOrderAlert');
+  document.getElementById('alertText').textContent = `🔔 ${count} nouvelle(s) commande(s) !`;
+  alert.classList.remove('hidden');
+}
+
+function updateOrdersUI(data) {
+  if (data.length !== lastOrderCount) {
+    lastOrderCount = data.length;
+    const list = document.getElementById('ordersList');
+    if (list) renderOrders(list, data);
+  }
+  const newOnes = data.filter(o => o.status === 'Nouveau');
+  const tabEl = document.querySelector('.tab[data-tab="orders"]');
+  if (tabEl) tabEl.textContent = `📦 Commandes${newOnes.length ? ' 🔴' + newOnes.length : ''}`;
+  if (newOnes.length) {
+    showAlert(newOnes.length);
+    const unseen = newOnes.filter(o => !notifiedIds.has(o.id));
+    unseen.forEach(o => {
+      notifiedIds.add(o.id);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🍕 Casa Tonio — Nouvelle commande', {
+          body: `${o.name} · ${o.slot} · ${o.commande.substring(0, 60)}`
+        });
+      }
+    });
+  } else {
+    document.getElementById('newOrderAlert').classList.add('hidden');
+  }
+}
+
+// Global polling (always active, checks for new orders)
+setInterval(async () => {
+  try {
+    const data = await api('/orders');
+    updateOrdersUI(data);
+  } catch (e) { /* ignore */ }
+}, 5000);
+
+// Orders tab: refresh displayed list on click
+document.querySelector('.tab[data-tab="orders"]').addEventListener('click', async () => {
+  try {
+    const data = await api('/orders');
+    lastOrderCount = data.length;
+    renderOrders(document.getElementById('ordersList'), data);
+  } catch (e) { /* ignore */ }
+});
+
+// Notification permission on first interaction
+document.addEventListener('click', () => {
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+}, { once: true });
+
+function renderOrders(list, orders) {
+  if (orders.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>Aucune commande pour le moment</p></div>';
+    return;
+  }
+  list.innerHTML = orders.map(o => `
+    <div class="pizza-card" style="grid-template-columns:1fr auto">
+      <div class="info">
+        <h3>${o.name} <span style="font-weight:400;font-size:0.8rem;color:#999">— ${o.date}</span></h3>
+        <p>📞 ${o.phone} · ${o.type} · ${o.slot || o.horaire || 'Non spécifié'} · 🍕 ${(o.commande.match(/(\d+)\s*x?/gi)||[]).reduce((s,m)=>s+parseInt(m),0)||1} pizza(s)</p>
+        <p style="font-size:0.85rem;color:#333;margin-top:4px"><strong>Commande :</strong> ${o.commande}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="status-badge status-${o.status === 'Nouveau' ? 'new' : o.status === 'Confirmée' ? 'confirmed' : 'done'}">${o.status}</span>
+        <button class="btn btn-sm btn-secondary" onclick="toggleOrderStatus(${o.id})">Changer statut</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteOrder(${o.id})">Supprimer</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadOrders() {
+  const orders = await api('/orders');
+  lastOrderCount = orders.length;
+  orders.forEach(o => notifiedIds.add(o.id));
+  renderOrders(document.getElementById('ordersList'), orders);
+}
+
+async function toggleOrderStatus(id) {
+  const orders = await api('/orders');
+  const order = orders.find(o => o.id === id);
+  if (!order) return;
+  const next = order.status === 'Nouveau' ? 'Confirmée' : order.status === 'Confirmée' ? 'Terminée' : 'Nouveau';
+  await api(`/orders/${id}`, { method: 'PUT', body: JSON.stringify({ status: next }) });
+  toast('Statut mis à jour');
+  await loadOrders();
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Supprimer cette commande ?')) return;
+  await api(`/orders/${id}`, { method: 'DELETE' });
+  toast('Commande supprimée');
+  await loadOrders();
+}
+
+// ─── Hours ───
+async function loadHours() {
+  const hours = await api('/hours');
+  const days = [['lundi','Lundi'],['mardi','Mardi'],['mercredi','Mercredi'],['jeudi','Jeudi'],['vendredi','Vendredi'],['samedi','Samedi'],['dimanche','Dimanche']];
+  const tbody = document.getElementById('hoursBody');
+  tbody.innerHTML = days.map(([key, label]) => {
+    const d = hours[key] || { midi: '', soir: '', ferme: false };
+    return `<tr>
+      <td><strong>${label}</strong></td>
+      <td><input type="text" class="hours-midi" data-day="${key}" value="${d.midi}"></td>
+      <td><input type="text" class="hours-soir" data-day="${key}" value="${d.soir}"></td>
+      <td><input type="checkbox" class="hours-ferme" data-day="${key}" ${d.ferme ? 'checked' : ''}></td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('saveHoursBtn').addEventListener('click', async () => {
+  const days = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  const hours = {};
+  days.forEach(day => {
+    hours[day] = {
+      midi: document.querySelector(`.hours-midi[data-day="${day}"]`).value,
+      soir: document.querySelector(`.hours-soir[data-day="${day}"]`).value,
+      ferme: document.querySelector(`.hours-ferme[data-day="${day}"]`).checked
+    };
+  });
+  try {
+    await api('/hours', { method: 'PUT', body: JSON.stringify(hours) });
+    toast('Horaires enregistrés');
+  } catch (e) { toast('Erreur: ' + e.message); }
+});
+
+// ─── Slot Overrides ───
+async function loadSlotOverrides() {
+  try {
+    const [hours, overrides] = await Promise.all([api('/hours'), api('/slotSettings')]);
+    const days = [['lundi','Lundi'],['mardi','Mardi'],['mercredi','Mercredi'],['jeudi','Jeudi'],['vendredi','Vendredi'],['samedi','Samedi'],['dimanche','Dimanche']];
+    const container = document.getElementById('slotOverridesContainer');
+    container.innerHTML = '';
+
+    for (const [key, label] of days) {
+      const d = hours[key];
+      if (!d || d.ferme) continue;
+      const ranges = [];
+      function splitHours(v) {
+        return (v.split('–').length > 1 ? v.split('–') : v.split(' - ')).map(s => s.trim());
+      }
+      if (d.midi && (d.midi.includes('–') || d.midi.includes(' - '))) {
+        const parts = splitHours(d.midi);
+        ranges.push([parts[0], parts[1]]);
+      }
+      if (d.soir && (d.soir.includes('–') || d.soir.includes(' - '))) {
+        const parts = splitHours(d.soir);
+        ranges.push([parts[0], parts[1]]);
+      }
+      if (ranges.length === 0) continue;
+
+      const slots = [];
+      function toMinutes(str) {
+        const [hh, mm] = str.replace(/[^\d:]/g, '').split(':').map(Number);
+        return hh * 60 + (mm || 0);
+      }
+      function fmt(t) {
+        return `${(t / 60 | 0)}h${t % 60 ? (t % 60 + '').padStart(2, '0') : ''}`;
+      }
+      for (const [start, end] of ranges) {
+        const s = toMinutes(start) - 15;
+        const e = toMinutes(end);
+        for (let t = s; t < e; t += 15) slots.push(fmt(t));
+      }
+      if (slots.length === 0) continue;
+
+      const div = document.createElement('div');
+      div.style.marginBottom = '20px';
+      div.innerHTML = '<div style="font-weight:600;margin-bottom:8px;font-size:0.9rem;color:var(--red);text-transform:capitalize">' + label + '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px">' +
+        slots.map(slot => {
+          const val = overrides[key] && overrides[key][slot] != null ? overrides[key][slot] : '';
+          return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px">' +
+            '<span style="font-size:0.7rem;color:#666">' + slot + '</span>' +
+            '<input type="number" class="slot-override" data-day="' + key + '" data-slot="' + slot + '" value="' + val + '" min="0" max="50" style="width:60px;padding:4px 6px;border:2px solid var(--gray-light);border-radius:4px;text-align:center;font-size:0.85rem;font-family:inherit">' +
+            '</div>';
+        }).join('') +
+        '</div>';
+      container.appendChild(div);
+    }
+  } catch (e) {
+    document.getElementById('slotOverridesContainer').innerHTML = '<p style="color:#d32f2f;font-size:0.85rem">Erreur: ' + e.message + '</p>';
+  }
+}
+
+// ─── Settings ───
+async function loadSettings() {
+  const settings = await api('/settings');
+  document.getElementById('maxPizzasPerSlot').value = settings.maxPizzasPerSlot || 5;
+  await loadSlotOverrides();
+}
+
+function collectSlotOverrides() {
+  const overrides = {};
+  document.querySelectorAll('.slot-override').forEach(input => {
+    const day = input.dataset.day;
+    const slot = input.dataset.slot;
+    const val = input.value.trim();
+    if (val !== '') {
+      if (!overrides[day]) overrides[day] = {};
+      overrides[day][slot] = parseInt(val);
+    }
+  });
+  return overrides;
+}
+
+document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+  const maxPizzasPerSlot = parseInt(document.getElementById('maxPizzasPerSlot').value) || 5;
+  try {
+    await Promise.all([
+      api('/settings', { method: 'PUT', body: JSON.stringify({ maxPizzasPerSlot }) }),
+      api('/slotSettings', { method: 'PUT', body: JSON.stringify(collectSlotOverrides()) })
+    ]);
+    toast('Réglages enregistrés');
+  } catch (e) { toast('Erreur: ' + e.message); }
+});
+
+document.getElementById('resetSlotOverridesBtn').addEventListener('click', async () => {
+  if (!confirm('Réinitialiser tous les créneaux personnalisés ?')) return;
+  try {
+    const empty = {};
+    ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'].forEach(d => empty[d] = {});
+    await api('/slotSettings', { method: 'PUT', body: JSON.stringify(empty) });
+    await loadSlotOverrides();
+    toast('Créneaux réinitialisés');
+  } catch (e) { toast('Erreur: ' + e.message); }
+});
+
+// ─── Init ───
+async function init() {
+  if (!token) { showLogin(); return; }
+  showAdmin();
+  try {
+    await Promise.all([loadPizzas(), loadOrders(), loadTestimonials(), loadHours(), loadSettings()]);
+  } catch (e) {
+    showLogin();
+  }
+}
+
+// Auto-login
+if (token) init(); else showLogin();
+</script>
+</body>
+</html>

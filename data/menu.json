@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "Margherita",
+    "description": "Sauce tomate, mozzarella fior di latte, basilic frais",
+    "price": "9.50 €",
+    "image": "https://cdn.website.dish.co/media/83/3f/8425421/CASA-TONIO-jpg-20230309-201756-0000-jpg.jpg",
+    "category": "Classiques",
+    "pizzaOfMonth": false,
+    "allergens": ["gluten", "lactose"]
+  },
+  {
+    "id": 2,
+    "name": "Regina",
+    "description": "Sauce tomate, mozzarella, jambon blanc, champignons, origan",
+    "price": "11.00 €",
+    "image": "https://cdn.website.dish.co/media/d7/b5/9902186/CASA-TONIO-20230406-213013-jpg.jpg",
+    "category": "Classiques",
+    "pizzaOfMonth": false,
+    "allergens": ["gluten", "lactose"]
+  },
+  {
+    "id": 3,
+    "name": "Napolitaine",
+    "description": "Sauce tomate, mozzarella, anchois, câpres, olives noires, origan",
+    "price": "11.50 €",
+    "image": "",
+    "category": "Classiques",
+    "pizzaOfMonth": false,
+    "allergens": ["gluten", "lactose", "poisson"]
+  },
+  {
+    "id": 4,
+    "name": "4 Fromages",
+    "description": "Sauce tomate, mozzarella, gorgonzola, chèvre, parmesan",
+    "price": "12.50 €",
+    "image": "",
+    "category": "Spéciales",
+    "pizzaOfMonth": false,
+    "allergens": ["gluten", "lactose"]
+  },
+  {
+    "id": 5,
+    "name": "Calzone",
+    "description": "Crème fraîche locale, mozzarella, champignons, lardons, oignons, fromage",
+    "price": "11.50 €",
+    "image": "",
+    "category": "Spéciales",
+    "pizzaOfMonth": false,
+    "allergens": ["gluten", "lactose"]
+  },
+  {
+    "id": 6,
+    "name": "Pizza du Mois",
+    "description": "Découvrez notre création du moment avec des produits de saison et locaux",
+    "price": "13.00 €",
+    "image": "https://cdn.website.dish.co/media/a4/15/825467.jpg",
+    "category": "Du Moment",
+    "pizzaOfMonth": true,
+    "allergens": ["gluten", "lactose"]
+  }
+]

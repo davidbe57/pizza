@@ -21,11 +21,25 @@ app.use((req, res, next) => {
   next();
 });
 
-let validTokens = new Set();
+function generateToken() {
+  const expiry = Date.now() + 86400000;
+  const payload = expiry + ':' + 'admin:' + ADMIN_PASSWORD;
+  const sig = crypto.createHmac('sha256', ADMIN_PASSWORD).update(payload).digest('hex');
+  return expiry + ':' + sig;
+}
+
+function verifyToken(token) {
+  const parts = token.split(':');
+  const expiry = parseInt(parts[0]);
+  const sig = parts.slice(1).join(':');
+  const payload = expiry + ':' + 'admin:' + ADMIN_PASSWORD;
+  const expected = crypto.createHmac('sha256', ADMIN_PASSWORD).update(payload).digest('hex');
+  return sig === expected && Date.now() < expiry;
+}
 
 function requireAuth(req, res, next) {
   const token = req.headers.authorization;
-  if (!token || !validTokens.has(token)) {
+  if (!token || !verifyToken(token)) {
     return res.status(401).json({ error: 'Non autorisé' });
   }
   next();
@@ -34,16 +48,12 @@ function requireAuth(req, res, next) {
 app.post('/api/login', (req, res) => {
   const { password } = req.body;
   if (password === ADMIN_PASSWORD) {
-    const token = crypto.randomBytes(32).toString('hex');
-    validTokens.add(token);
-    return res.json({ token });
+    return res.json({ token: generateToken() });
   }
   res.status(401).json({ error: 'Mot de passe incorrect' });
 });
 
 app.post('/api/logout', (req, res) => {
-  const token = req.headers.authorization;
-  if (token) validTokens.delete(token);
   res.json({ ok: true });
 });
 

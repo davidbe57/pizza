@@ -7,16 +7,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'tonio2024';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+let _supabase = null;
 
 app.use(express.json());
 
 if (process.env.VERCEL !== '1') {
   app.use(express.static(__dirname));
 }
+
+// Middleware: inject supabase client into every request
+app.use((req, res, next) => {
+  if (_supabase) { req.supabase = _supabase; return next(); }
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+    return res.status(500).json({ error: 'Supabase non configuré (SUPABASE_URL et SUPABASE_ANON_KEY requis)' });
+  }
+  _supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+  req.supabase = _supabase;
+  next();
+});
 
 let validTokens = new Set();
 
@@ -47,40 +55,40 @@ app.post('/api/logout', (req, res) => {
 
 // ─── MENU ───
 app.get('/api/menu', async (req, res) => {
-  const { data, error } = await supabase.from('menu').select('*').order('id');
+  const { data, error } = await req.supabase.from('menu').select('*').order('id');
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
 app.post('/api/menu', requireAuth, async (req, res) => {
-  const { data, error } = await supabase.from('menu').insert(req.body).select();
+  const { data, error } = await req.supabase.from('menu').insert(req.body).select();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
 });
 
 app.put('/api/menu/:id', requireAuth, async (req, res) => {
-  const { data, error } = await supabase.from('menu').update(req.body).eq('id', parseInt(req.params.id)).select();
+  const { data, error } = await req.supabase.from('menu').update(req.body).eq('id', parseInt(req.params.id)).select();
   if (error) return res.status(500).json({ error: error.message });
   if (!data.length) return res.status(404).json({ error: 'Pizza introuvable' });
   res.json(data[0]);
 });
 
 app.delete('/api/menu/:id', requireAuth, async (req, res) => {
-  const { error } = await supabase.from('menu').delete().eq('id', parseInt(req.params.id));
+  const { error } = await req.supabase.from('menu').delete().eq('id', parseInt(req.params.id));
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true });
 });
 
 // ─── TESTIMONIALS ───
 app.get('/api/testimonials', async (req, res) => {
-  const { data, error } = await supabase.from('testimonials').select('*').order('id');
+  const { data, error } = await req.supabase.from('testimonials').select('*').order('id');
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
 app.post('/api/testimonials', requireAuth, async (req, res) => {
   const { author, source, text, stars } = req.body;
-  const { data, error } = await supabase.from('testimonials').insert({
+  const { data, error } = await req.supabase.from('testimonials').insert({
     author, source: source || '', text, stars: stars || 5,
     date: new Date().toISOString().slice(0, 10)
   }).select();
@@ -89,33 +97,33 @@ app.post('/api/testimonials', requireAuth, async (req, res) => {
 });
 
 app.put('/api/testimonials/:id', requireAuth, async (req, res) => {
-  const { data, error } = await supabase.from('testimonials').update(req.body).eq('id', parseInt(req.params.id)).select();
+  const { data, error } = await req.supabase.from('testimonials').update(req.body).eq('id', parseInt(req.params.id)).select();
   if (error) return res.status(500).json({ error: error.message });
   if (!data.length) return res.status(404).json({ error: 'Avis introuvable' });
   res.json(data[0]);
 });
 
 app.delete('/api/testimonials/:id', requireAuth, async (req, res) => {
-  const { error } = await supabase.from('testimonials').delete().eq('id', parseInt(req.params.id));
+  const { error } = await req.supabase.from('testimonials').delete().eq('id', parseInt(req.params.id));
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true });
 });
 
 // ─── ORDERS ───
 app.get('/api/orders', requireAuth, async (req, res) => {
-  const { data, error } = await supabase.from('orders').select('*').order('id', { ascending: false });
+  const { data, error } = await req.supabase.from('orders').select('*').order('id', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
 app.post('/api/orders', async (req, res) => {
-  const { data: orders, error: ordersErr } = await supabase.from('orders').select('*');
+  const { data: orders, error: ordersErr } = await req.supabase.from('orders').select('*');
   if (ordersErr) return res.status(500).json({ error: ordersErr.message });
 
-  const { data: settings, error: setErr } = await supabase.from('settings').select('*').eq('key', 'maxPizzasPerSlot').single();
+  const { data: settings, error: setErr } = await req.supabase.from('settings').select('*').eq('key', 'maxPizzasPerSlot').single();
   if (setErr && setErr.code !== 'PGRST116') return res.status(500).json({ error: setErr.message });
 
-  const { data: slotOverrides, error: slotErr } = await supabase.from('slot_settings').select('*');
+  const { data: slotOverrides, error: slotErr } = await req.supabase.from('slot_settings').select('*');
   if (slotErr) return res.status(500).json({ error: slotErr.message });
 
   const now = new Date();
@@ -150,36 +158,36 @@ app.post('/api/orders', async (req, res) => {
     status: 'Nouveau'
   };
 
-  const { data, error } = await supabase.from('orders').insert(order).select();
+  const { data, error } = await req.supabase.from('orders').insert(order).select();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
 });
 
 app.put('/api/orders/:id', requireAuth, async (req, res) => {
-  const { data, error } = await supabase.from('orders').update(req.body).eq('id', parseInt(req.params.id)).select();
+  const { data, error } = await req.supabase.from('orders').update(req.body).eq('id', parseInt(req.params.id)).select();
   if (error) return res.status(500).json({ error: error.message });
   if (!data.length) return res.status(404).json({ error: 'Commande introuvable' });
   res.json(data[0]);
 });
 
 app.delete('/api/orders/:id', requireAuth, async (req, res) => {
-  const { error } = await supabase.from('orders').delete().eq('id', parseInt(req.params.id));
+  const { error } = await req.supabase.from('orders').delete().eq('id', parseInt(req.params.id));
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true });
 });
 
 // ─── AVAILABILITY (public) ───
 app.get('/api/slots', async (req, res) => {
-  const { data: orders, error: ordersErr } = await supabase.from('orders').select('*');
+  const { data: orders, error: ordersErr } = await req.supabase.from('orders').select('*');
   if (ordersErr) return res.status(500).json({ error: ordersErr.message });
 
-  const { data: hours, error: hoursErr } = await supabase.from('hours').select('*');
+  const { data: hours, error: hoursErr } = await req.supabase.from('hours').select('*');
   if (hoursErr) return res.status(500).json({ error: hoursErr.message });
 
-  const { data: settings, error: setErr } = await supabase.from('settings').select('*').eq('key', 'maxPizzasPerSlot').single();
+  const { data: settings, error: setErr } = await req.supabase.from('settings').select('*').eq('key', 'maxPizzasPerSlot').single();
   if (setErr && setErr.code !== 'PGRST116') return res.status(500).json({ error: setErr.message });
 
-  const { data: slotOverrides, error: slotErr } = await supabase.from('slot_settings').select('*');
+  const { data: slotOverrides, error: slotErr } = await req.supabase.from('slot_settings').select('*');
   if (slotErr) return res.status(500).json({ error: slotErr.message });
 
   const defaultMax = settings ? (typeof settings.value === 'number' ? settings.value : parseInt(settings.value) || 5) : 5;
@@ -239,7 +247,7 @@ app.get('/api/slots', async (req, res) => {
 
 // ─── SLOT SETTINGS ───
 app.get('/api/slotSettings', async (req, res) => {
-  const { data, error } = await supabase.from('slot_settings').select('*');
+  const { data, error } = await req.supabase.from('slot_settings').select('*');
   if (error) return res.status(500).json({ error: error.message });
   const grouped = { lundi: {}, mardi: {}, mercredi: {}, jeudi: {}, vendredi: {}, samedi: {}, dimanche: {} };
   data.forEach(s => {
@@ -249,7 +257,7 @@ app.get('/api/slotSettings', async (req, res) => {
 });
 
 app.put('/api/slotSettings', requireAuth, async (req, res) => {
-  const { data: existing } = await supabase.from('slot_settings').select('id, jour, slot_time');
+  const { data: existing } = await req.supabase.from('slot_settings').select('id, jour, slot_time');
   const seen = new Set();
   const inserts = [];
   for (const [jour, overrides] of Object.entries(req.body)) {
@@ -261,16 +269,16 @@ app.put('/api/slotSettings', requireAuth, async (req, res) => {
   // Delete removed entries
   for (const row of existing || []) {
     if (row.slot_time && !seen.has(`${row.jour}:${row.slot_time}`)) {
-      await supabase.from('slot_settings').delete().eq('id', row.id);
+      await req.supabase.from('slot_settings').delete().eq('id', row.id);
     }
   }
   // Upsert new ones
   for (const ins of inserts) {
-    const { data: existingRow } = await supabase.from('slot_settings').select('id').eq('jour', ins.jour).eq('slot_time', ins.slot_time).maybeSingle();
+    const { data: existingRow } = await req.supabase.from('slot_settings').select('id').eq('jour', ins.jour).eq('slot_time', ins.slot_time).maybeSingle();
     if (existingRow) {
-      await supabase.from('slot_settings').update(ins).eq('id', existingRow.id);
+      await req.supabase.from('slot_settings').update(ins).eq('id', existingRow.id);
     } else {
-      await supabase.from('slot_settings').insert(ins);
+      await req.supabase.from('slot_settings').insert(ins);
     }
   }
   res.json({ ok: true });
@@ -278,7 +286,7 @@ app.put('/api/slotSettings', requireAuth, async (req, res) => {
 
 // ─── SETTINGS ───
 app.get('/api/settings', async (req, res) => {
-  const { data, error } = await supabase.from('settings').select('*');
+  const { data, error } = await req.supabase.from('settings').select('*');
   if (error) return res.status(500).json({ error: error.message });
   const obj = {};
   data.forEach(s => { obj[s.key] = s.value; });
@@ -287,11 +295,11 @@ app.get('/api/settings', async (req, res) => {
 
 app.put('/api/settings', requireAuth, async (req, res) => {
   for (const [key, value] of Object.entries(req.body)) {
-    const { data: existing } = await supabase.from('settings').select('id').eq('key', key).maybeSingle();
+    const { data: existing } = await req.supabase.from('settings').select('id').eq('key', key).maybeSingle();
     if (existing) {
-      await supabase.from('settings').update({ value }).eq('id', existing.id);
+      await req.supabase.from('settings').update({ value }).eq('id', existing.id);
     } else {
-      await supabase.from('settings').insert({ key, value });
+      await req.supabase.from('settings').insert({ key, value });
     }
   }
   res.json(req.body);
@@ -299,7 +307,7 @@ app.put('/api/settings', requireAuth, async (req, res) => {
 
 // ─── HOURS ───
 app.get('/api/hours', async (req, res) => {
-  const { data, error } = await supabase.from('hours').select('*').order('id');
+  const { data, error } = await req.supabase.from('hours').select('*').order('id');
   if (error) return res.status(500).json({ error: error.message });
   const obj = {};
   data.forEach(h => { obj[h.jour] = { midi: h.midi, soir: h.soir, ferme: h.ferme }; });
@@ -308,11 +316,11 @@ app.get('/api/hours', async (req, res) => {
 
 app.put('/api/hours', requireAuth, async (req, res) => {
   for (const [jour, h] of Object.entries(req.body)) {
-    const { data: existing } = await supabase.from('hours').select('id').eq('jour', jour).maybeSingle();
+    const { data: existing } = await req.supabase.from('hours').select('id').eq('jour', jour).maybeSingle();
     if (existing) {
-      await supabase.from('hours').update({ midi: h.midi, soir: h.soir, ferme: h.ferme }).eq('id', existing.id);
+      await req.supabase.from('hours').update({ midi: h.midi, soir: h.soir, ferme: h.ferme }).eq('id', existing.id);
     } else {
-      await supabase.from('hours').insert({ jour, midi: h.midi, soir: h.soir, ferme: h.ferme });
+      await req.supabase.from('hours').insert({ jour, midi: h.midi, soir: h.soir, ferme: h.ferme });
     }
   }
   res.json(req.body);

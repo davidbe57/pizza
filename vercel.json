@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "builds": [
+    { "src": "api/index.js", "use": "@vercel/node" },
+    { "src": "*.{html,js,css,json,png,jpg,svg,ico,webp}", "use": "@vercel/static" },
+    { "src": "admin/**", "use": "@vercel/static" }
+  ],
   "routes": [
     { "src": "/api/(.*)", "dest": "api/index.js" },
     { "handle": "filesystem" },

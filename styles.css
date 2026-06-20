@@ -786,7 +786,7 @@ a {
 .partner-card {
   background: var(--white);
   border-radius: 16px;
-  padding: 32px 24px;
+  padding: 20px 16px;
   text-align: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.06);
   transition: transform 0.3s, box-shadow 0.3s;
@@ -799,10 +799,10 @@ a {
 }
 
 .partner-card img {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   object-fit: contain;
-  margin: 0 auto 16px;
+  margin: 0 auto 12px;
   border-radius: 8px;
 }
 

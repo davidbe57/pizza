@@ -315,7 +315,11 @@ app.put('/api/hours', requireAuth, async (req, res) => {
   res.json(req.body);
 });
 
-app.listen(PORT, () => {
-  console.log(`Casa Tonio - http://localhost:${PORT}`);
-  console.log(`Admin - http://localhost:${PORT}/admin/`);
-});
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`Casa Tonio - http://localhost:${PORT}`);
+    console.log(`Admin - http://localhost:${PORT}/admin/`);
+  });
+}
+
+module.exports = app;

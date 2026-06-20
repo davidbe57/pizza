@@ -13,7 +13,10 @@ const supabase = createClient(
 );
 
 app.use(express.json());
-app.use(express.static(__dirname));
+
+if (process.env.VERCEL !== '1') {
+  app.use(express.static(__dirname));
+}
 
 let validTokens = new Set();
 

@@ -493,59 +493,6 @@ orderForm.addEventListener('submit', async (e) => {
   }
 });
 
-// ─── Lightbox ───
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightboxImg');
-const lightboxClose = document.getElementById('lightboxClose');
-const lightboxPrev = document.getElementById('lightboxPrev');
-const lightboxNext = document.getElementById('lightboxNext');
-const lightboxCounter = document.getElementById('lightboxCounter');
-let galleryItems = [];
-let currentIndex = 0;
-
-function openLightbox(index) {
-  currentIndex = index;
-  const item = galleryItems[index];
-  if (!item) return;
-  lightboxImg.src = item.dataset.src;
-  lightboxImg.alt = item.querySelector('img').alt;
-  lightboxCounter.textContent = `${index + 1} / ${galleryItems.length}`;
-  lightbox.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLightbox() {
-  lightbox.classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function navigateLightbox(dir) {
-  currentIndex = (currentIndex + dir + galleryItems.length) % galleryItems.length;
-  const item = galleryItems[currentIndex];
-  lightboxImg.src = item.dataset.src;
-  lightboxImg.alt = item.querySelector('img').alt;
-  lightboxCounter.textContent = `${currentIndex + 1} / ${galleryItems.length}`;
-}
-
-galleryItems = document.querySelectorAll('.gallery-item');
-galleryItems.forEach((item, i) => {
-  item.addEventListener('click', () => openLightbox(i));
-});
-
-lightboxClose.addEventListener('click', closeLightbox);
-lightbox.addEventListener('click', (e) => {
-  if (e.target === lightbox) closeLightbox();
-});
-lightboxPrev.addEventListener('click', () => navigateLightbox(-1));
-lightboxNext.addEventListener('click', () => navigateLightbox(1));
-
-document.addEventListener('keydown', (e) => {
-  if (!lightbox.classList.contains('open')) return;
-  if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowLeft') navigateLightbox(-1);
-  if (e.key === 'ArrowRight') navigateLightbox(1);
-});
-
 // ─── Cookie Consent ───
 if (!localStorage.getItem('cookieConsent')) {
   setTimeout(() => {
@@ -602,7 +549,7 @@ document.querySelectorAll(
 });
 
 // Grid items with stagger
-['.menu-item-card', '.partner-card', '.gallery-item', '.engagement-card', '.testimonial-card'].forEach(sel => {
+['.menu-item-card', '.partner-card', '.engagement-card', '.testimonial-card'].forEach(sel => {
   document.querySelectorAll(sel).forEach((el, i) => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(30px)';
